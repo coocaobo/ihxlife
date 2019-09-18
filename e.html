@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!--编码格式-->
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <!--移动端尺寸设置-->
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <!--禁止将数字识别为电话号码-->
+    <meta name="format-detection" content="telephone=no"/>
+    <!--忽略Android平台中对邮箱地址的识别-->
+    <meta name="format-detection" content="email=no"/>
+    <!--当网站添加到主屏幕快速启动方式，可隐藏地址栏，仅针对ios的safari-->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <title>早会打卡</title>
+    <!--重置表-->
+    <link rel="stylesheet" href="../../css/reset.css">
+    <!--基本样式表-->
+    <link rel="stylesheet" href="../../css/style/sign.rem_0.css">
+    <!--加载进度圆环进度样式表-->
+    <link rel="stylesheet" href="../../css/style/process.css">
+    <!--引入高德地图API相关控件-->
+    <!--	<link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>-->
+    <!--	<link rel="stylesheet" href="../../css/map/main1119.css">-->
+    <!--ios11通过https方式访问定位接口文件-->
+    <script type="text/javascript" src="../../js/map/ios11_remogeo.js"></script>
+    <!--	涉及到个人账号申请的key的文件-->
+    <!--	<script type="text/javascript" src="../../js/map/webapi_1_4_4.js"></script>-->
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.12&key=a5355741ce95d42621ef4c9d987c637c"></script>
+    <!--    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&key=0316a42d29efdc0a9a146d2794c76af9"></script>-->
+    <!--    <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>-->
+    <script type="text/javascript" src="../../js/map/addToolbar.js"></script>
+    <!--移动端rem适配-->
+    <script type="text/javascript" src="../../js/rem/Rem.js"></script>
+    <!--引入juery文件-->
+    <script type="text/javascript" src="../../js/jquery/jquery-2.2.4.min.js"></script>
+    <!-- step1:引入微信接口文件-->
+    <!--	<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>-->
+    <script type="text/javascript" src="../../js/weixin/jweixin-1.2.0.js"></script>
+    <!--引进禁用右上角分享复制链接功能逻辑控制文件-->
+    <script type="text/javascript" src="../../js/forbiden/forbidCopyUrl_new_20180315.js"></script>
+    <!--引入ajax函数调用js文件-->
+    <script type="text/javascript" src="../../js/ajax/tms_ajax_20180502.js"></script>
+    <!--引入获取经纬度的文件-->
+    <script type="text/javascript" src="../../js/getlnglat/get_lnglat_20190114.js"></script>
+
+    <!--引进获取页面URL中参数值的封装js-->
+    <script type="text/javascript" src="../../js/getParameter/get_parameter.js"></script>
+    <script type="text/javascript" src="../../js/getParameter/getqueryurlparameterobj.js"></script>
+    <!--引入阻止移动端长按弹出菜单的操作-->
+    <script type="text/javascript" src="../../js/forbiden/forbiddenOpenInBrowser.js"></script>
+    <!--打开摄影头-->
+    <script type="text/javascript" src="../../js/ajax/needface_20180712.js"></script>
+    <script type="text/javascript" src="../../js/hrefutil.js"></script>
+</head>
+<body>
+<div class="prevent_box">
+    <!--签到进入欢迎页面-->
+    <div id="welcomepage">
+        <p id="managecomname"></p>
+        <!--			<p class="timebox">最晚签到时间为: <span class="begintime"></span>最早签退时间为: <span class="finishtime"></span></p>-->
+        <!--			<p></p>-->
+        <p id="signposition"></p>
+        <div class="zaohuiqiandaoBtn">早会打卡</div>
+    </div>
+
+    <!--签到成功-->
+    <div id="success_qiandao">
+        <div class="signbox">
+            <img src="../../images/sign_success.png" alt="签到成功" class="signimg">
+            <!--			<p class="title">签到考勤成功!</p>-->
+            <p class="title content">机构</p>
+            <!--			<div class="close">关闭</div>-->
+        </div>
+    </div>
+    <!--签到失败-->
+    <div id="fail_qiandao">
+        <div class="signbox">
+            <img src="../../images/sign_fail.png" alt="签到失败" class="signimg">
+            <p class="title">签到或签退失败</p>
+            <!--后台信息，告知用户签到失败原因-->
+            <p class="content"></p>
+            <!--			<div class="close">关闭</div>-->
+            <!--			<a href="javascript:window.close();" class="close">关闭</a>-->
+        </div>
+    </div>
+
+    <!-- 调用人脸 -->
+    <div class="need-face-box" id="needFaceBox">
+        <div class="head_portrait">
+            <img src="../../images/faceTips.png" alt="" id="chooseImage1" class="imgbox">
+            <div class="return-img" id="returnImgBox">
+                <img src="" alt="" id="returnImg">
+            </div>
+            <p class="tips" id="tips">开始拍摄</p>
+        </div>
+    </div>
+
+    <!--拍照之后询问是否确认上传-->
+    <div id="isupload" class="isupload">
+        <p class="isuploadtext">确认上传?</p>
+        <span id="isupload_y">是</span>
+        <span id="isupload_n">否</span>
+    </div>
+
+    <!--加载进度body部分元素-->
+    <div class="processwrap">
+        <div class="outer"></div>
+        <div class="inner">
+            <div class="spiner"></div>
+            <div class="filler"></div>
+            <div class="masker"></div>
+        </div>
+        <div class="inner2">
+            <div class="spiner"></div>
+            <div class="filler"></div>
+            <div class="masker"></div>
+        </div>
+    </div>
+    <!--版本标识-->
+    <p style="width:100%;position: absolute;bottom: 10px;left: 0;color: darkgrey;font-size:12px;text-align: center;">v6.5</p>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+
+    get_browerversion();
+
+
+    //移动端可视窗口的高度
+    var VisualHeight = document.documentElement.clientHeight;
+    $("#welcomepage").css("height",VisualHeight);
+    $("#needFaceBox").css("height",VisualHeight);
+    $(".head_portrait").css("height",VisualHeight);
+    //定义全局变量openid
+    var get_openid = GetQueryString("openid");
+
+    //	var attendId = localStorage.getItem("attendId");
+    var attendId = getCookie('cookieId');
+
+    var cacheflag = "";
+
+    if(attendId){
+//		alert("成功取得openid");
+        if(get_openid != attendId){
+            cacheflag = "2";
+//			alert("请使用本人微信进行打卡操作!");
+        }else{
+            cacheflag = "1";
+//			alert("两次openid一致,可以进行打卡");
+            beginSign();
+        }
+    }else{
+        cacheflag = "0";
+//		//将openid放入缓存
+//		localStorage.setItem("attendId",get_openid);
+//		alert("开始设置openid");
+//		alert("缓存中的openid为 " + localStorage.getItem("attendId"));
+        beginSign();
+    }
+    function beginSign(){
+        //从URL中获取此二维码的ID
+        var qrcodeID = GetQueryString("attach");
+
+        //设置签到标志位，禁止用户重复操作调用数据库，造成大量无效重复数据。
+        var codeBtnFlag = true;
+
+        //获取URL中的参数
+        var URL_data = getUrlObject();
+
+        //调用函数：获取经纬度后拼接参数，调用ajax，传到数据库中进行签到有效性的判断
+        //判断签到的有效性
+        var calltype = "morning";
+
+        if(qrcodeID.length == 20){
+            //从getuseropenid接口跳转而来
+
+            var data_info = {
+                "qrcodeid":qrcodeID,
+                "staffcode":""
+            }
+            //调用考勤信息并展示在页面上，初始化
+            var updateId = [];
+
+            //调用已经建立的早会考勤列表，单个二维码ID调用
+            get_MorningMeetingList(data_info,updateId);
+
+            //早会打卡按钮
+            $(".zaohuiqiandaoBtn").css("display","block");
+
+            //定义事件锁
+            var amount = 0;
+
+            //打卡按钮点击事件
+            $(".zaohuiqiandaoBtn").click(function(){
+                $("#sign-btn").css("backgroundColor","gainsboro");
+                amount += 1;
+                if(amount == 1){
+                    var data = {
+                        "openid":get_openid,
+                        "userid": "",
+                        "timestamp": URL_data.timestamp,
+                        "nonce": URL_data.nonce,
+                        "trade_source": URL_data.trade_source,
+                        "signature": URL_data.signature,
+                        "cacheflag": cacheflag
+                    }
+
+                    //加载进度条显示
+                    $(".processwrap").css("display","blcok");
+
+                    //早会签到按钮消失
+                    $("#welcomepage").css("display","none");
+
+                    get_position(calltype,data,qrcodeID,codeBtnFlag);
+                }else{
+                    //重复操作，不做处理
+                }
+            });
+        }else{
+            //QRcodeSign接口跳转而来。(已经打卡过，但是根据userid没有查到此人信息)
+            //不再让用户二次打卡，直接调用获取经纬度函数并进行打卡判断
+            //加载进度条显示
+            $(".processwrap").css("display","blcok");
+
+            var strs= new Array(); //定义一数组
+            strs = qrcodeID.split("*"); //字符分割
+
+            var qrid_val = strs[0];
+            var lng_val = strs[1];
+            var lat_val = strs[2];
+
+
+            //不再调用获取经纬度的函数，直接准备参数，调用签到的接口。
+            var useridInvalidData = {
+                "openid": get_openid,
+                "userid": "",
+                "timestamp": URL_data.timestamp,
+                "nonce": URL_data.nonce,
+                "trade_source": URL_data.trade_source,
+                "signature": URL_data.signature,
+                "qrcodeid" : qrid_val,
+                "attentype": "morning",
+                "longitude" : lng_val,
+                "latitude" : lat_val,
+                "cacheflag": cacheflag
+            }
+            //		alert(JSON.stringify(useridInvalidData));
+            //调用ajax,将经纬度和工号返回给后台
+            if(codeBtnFlag){
+                return_lnglat(useridInvalidData);
+            }else{
+                /*codeBtnFlag 为false*/
+                //加载进度条隐藏
+                $(".processwrap").css("display","none");
+                alert("操作过于频繁或重复,请重新扫码!");
+            }
+            //设置为false,防止用户在第一次请求服务器未完成时进行二次调用。
+            codeBtnFlag = false;
+            //		get_position(calltype,data,qrcodeID,codeBtnFlag);
+        }
+    }
+    //获取cookie
+    function getCookie(c_name)
+    {
+        if(document.cookie.length>0){
+            c_start=document.cookie.indexOf(c_name + "=")
+            if (c_start!=-1){
+                c_start = c_start + c_name.length+1;
+                c_end = document.cookie.indexOf(";",c_start);
+                if (c_end==-1) c_end=document.cookie.length
+                return unescape(document.cookie.substring(c_start,c_end));
+            }
+        }
+        return "";
+    }
+</script>
