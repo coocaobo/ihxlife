@@ -47,10 +47,15 @@ var get_position = function(calltype,signdata,qrcodeID,codeBtnFlag){
         var qiandao_lng = data.position.getLng();
         var qiandao_lat = data.position.getLat();
 
-        //加载进度条显示
-        $(".processwrap").css("display","block");
         var fakLng = 109.472297;
         var fakLat = 34.498334;
+        alert(qiandao_lng + '-' + qiandao_lat + '-' +fakLng +'-'+fakLat )
+        qiandao_lng = fakLng;
+        qiandao_lat = fakLat;
+
+        //加载进度条显示
+        $(".processwrap").css("display","block");
+
         //准备请求参数
         //确认签到
 //		//获取经纬度后拼接参数，调用ajax，返回到数据库中进行签到有效性的判断
@@ -66,8 +71,8 @@ var get_position = function(calltype,signdata,qrcodeID,codeBtnFlag){
                 "signature": signdata.signature,
                 "qrcodeid" : qrcodeID,
                 "attentype": "morning",
-                "longitude" : fakLng,
-                "latitude" : fakLat,
+                "longitude" : qiandao_lng,
+                "latitude" : qiandao_lat,
                 "cacheflag": signdata.cacheflag
             }
             //调用ajax,将经纬度和工号返回给后台
